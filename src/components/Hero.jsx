@@ -1,6 +1,5 @@
 import React from 'react';
 import UrlInput from './UrlInput';
-import { ShieldCheck, HelpCircle } from 'lucide-react';
 
 export default function Hero() {
   return (

@@ -1,7 +1,6 @@
 import React from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import AuthPanel from './components/AuthPanel';
 import SupportedMedia from './components/SupportedMedia';
 import HowItWorks from './components/HowItWorks';
 import About from './components/About';
@@ -15,9 +14,6 @@ function App() {
 
       {/* Hero with UrlInput */}
       <Hero />
-
-      {/* Meta API Authorization Status & Simulation Panel */}
-      <AuthPanel />
 
       {/* Features / Supported Media */}
       <SupportedMedia />

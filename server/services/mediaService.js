@@ -1,4 +1,3 @@
-import { getActiveSession } from '../controllers/authController.js';
 import { AppError } from '../middleware/errorMiddleware.js';
 import { snapsave } from 'snapsave-media-downloader';
 

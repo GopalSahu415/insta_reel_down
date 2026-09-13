@@ -1,14 +1,18 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Cleanly resolve API URL:
+// 1. If VITE_API_URL is configured, use it (stripping trailing slash).
+// 2. Otherwise default to relative path '' (works seamlessly on Vercel and via Vite dev proxy).
+export const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
 /**
- * Retrieve media placeholder information from the backend.
+ * Retrieve media information from the backend.
  * 
  * @param {string} url - The user-provided Instagram media link
  * @returns {Promise<object>} - The backend response JSON
  */
 export async function retrieveMediaFromApi(url) {
   try {
-    const response = await fetch(`${API_URL}/api/media/retrieve`, {
+    const endpoint = `${API_URL}/api/media/retrieve`;
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,7 +32,9 @@ export async function retrieveMediaFromApi(url) {
     if (error.message && !error.message.includes('Failed to fetch')) {
       throw error;
     }
-    throw new Error('Connection refused: Unable to connect to the backend server. Make sure the Node server is started on ' + API_URL);
+    throw new Error(
+      'Unable to connect to the media server. Please verify your internet connection or try again in a moment.'
+    );
   }
 }
 

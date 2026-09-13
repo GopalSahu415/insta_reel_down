@@ -34,12 +34,13 @@ export async function downloadMediaFile(req, res, next) {
     
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'TelegramBot (like TwitterBot)',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       }
     });
 
     if (!response.ok) {
-      return res.status(response.status).send(`Failed to retrieve media file (HTTP ${response.status})`);
+      console.warn(`[Proxy Download] Direct stream returned HTTP ${response.status}. Redirecting directly to media source.`);
+      return res.redirect(url);
     }
 
     const ext = type?.toLowerCase() === 'post' ? 'jpg' : 'mp4';
@@ -54,6 +55,10 @@ export async function downloadMediaFile(req, res, next) {
 
   } catch (error) {
     console.error('[Proxy Download Controller Error]', error);
+    // If proxy streaming fails, fallback to direct redirect so user still gets the file
+    if (req.query.url) {
+      return res.redirect(req.query.url);
+    }
     next(error);
   }
 }

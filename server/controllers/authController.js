@@ -22,10 +22,10 @@ function loadSession() {
         isSandbox: false,
       }
     : {
-        isConnected: false,
-        accessToken: null,
-        status: 'disconnected',
-        accountName: null,
+        isConnected: true,
+        accessToken: 'MOCK_VALID_TOKEN_VITE_INSTASAVE',
+        status: 'connected',
+        accountName: 'CreatorSandbox (Active)',
         isSandbox: true,
       };
 

@@ -1,32 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link2, ArrowRight, Loader2, AlertCircle, CheckCircle, Info, Server, Calendar } from 'lucide-react';
-import { retrieveMediaFromApi, getAuthSession } from '../services/api';
+import React, { useState } from 'react';
+import { Link2, ArrowRight, Loader2, AlertCircle, Info, Server, Calendar } from 'lucide-react';
+import { retrieveMediaFromApi, API_URL } from '../services/api';
 
 export default function UrlInput() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiResponse, setApiResponse] = useState(null);
-  const [authState, setAuthState] = useState({ isConnected: false, status: 'disconnected' });
-
-  // Sync auth status
-  const checkAuth = async () => {
-    try {
-      const response = await getAuthSession();
-      setAuthState(response.data);
-      if (!response.data.isConnected || response.data.status !== 'connected') {
-        setApiResponse(null);
-      }
-    } catch (err) {
-      console.error('Failed to sync auth session:', err);
-    }
-  };
-
-  useEffect(() => {
-    checkAuth();
-    window.addEventListener('auth-change', checkAuth);
-    return () => window.removeEventListener('auth-change', checkAuth);
-  }, []);
 
   const validateUrl = (input) => {
     if (!input.trim()) {
@@ -36,7 +16,7 @@ export default function UrlInput() {
 
     const containsInstagram = input.toLowerCase().includes('instagram.com');
     if (!containsInstagram) {
-      setError('Please enter a valid Instagram URL (e.g., https://www.instagram.com/p/...)');
+      setError('Please enter a valid Instagram URL (e.g., https://www.instagram.com/reel/...)');
       return false;
     }
 
@@ -49,16 +29,6 @@ export default function UrlInput() {
     setApiResponse(null);
 
     if (!validateUrl(url)) {
-      return;
-    }
-
-    if (!authState.isConnected) {
-      setError('Meta API authentication required. Please connect your Instagram Professional account to proceed.');
-      return;
-    }
-
-    if (authState.status === 'expired') {
-      setError('Meta API authorization has expired or was revoked. Please log in again to renew access.');
       return;
     }
 
@@ -103,7 +73,7 @@ export default function UrlInput() {
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span>Verifying...</span>
+                <span>Fetching...</span>
               </>
             ) : (
               <>
@@ -123,10 +93,9 @@ export default function UrlInput() {
         </div>
       )}
 
-      {/* Premium Search Result Card (Requested Layout) */}
+      {/* Premium Search Result Card */}
       {apiResponse && (
         <div className="mt-12 text-center animate-fadeIn">
-          {/* Card Title */}
           <h2 className="text-2xl font-extrabold text-white mb-6">
             Search result
           </h2>
@@ -137,7 +106,7 @@ export default function UrlInput() {
               
               {/* Media Preview Window */}
               <div className="relative aspect-[9/16] bg-slate-950 w-full overflow-hidden flex items-center justify-center">
-                {apiResponse.type === 'Reel' || apiResponse.type === 'Story' || apiResponse.type === 'VIDEO' ? (
+                {apiResponse.type === 'Reel' || apiResponse.type === 'Story' || apiResponse.type === 'VIDEO' || apiResponse.type === 'video' ? (
                   <video
                     src={apiResponse.downloadUrl}
                     poster={apiResponse.thumbnailUrl}
@@ -158,7 +127,7 @@ export default function UrlInput() {
               <div className="p-4 bg-slate-900 border-t border-slate-800">
                 {apiResponse.downloadUrl ? (
                   <a
-                    href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/media/download?url=${encodeURIComponent(apiResponse.downloadUrl)}&type=${apiResponse.type}`}
+                    href={`${API_URL}/api/media/download?url=${encodeURIComponent(apiResponse.downloadUrl)}&type=${apiResponse.type}`}
                     className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all duration-200 text-center block text-base active:scale-[0.97] shadow-lg shadow-blue-600/25"
                   >
                     Download
@@ -172,30 +141,30 @@ export default function UrlInput() {
             </div>
           </div>
 
-          {/* Compliance & API Log Details (Subtle layout below the card) */}
+          {/* Details layout below the card */}
           <div className="mt-8 max-w-lg mx-auto rounded-xl border border-slate-800/80 bg-slate-950/20 p-4 text-left">
             <div className="flex justify-between items-center pb-2 border-b border-slate-800">
-              <span className="text-[10px] text-fuchsia-400 font-extrabold uppercase tracking-wider">Meta API Verification Logs</span>
+              <span className="text-[10px] text-fuchsia-400 font-extrabold uppercase tracking-wider">Media Details</span>
               <span className="flex items-center gap-1 text-[10px] text-slate-500">
                 <Server className="h-3 w-3" />
-                {apiResponse.source}
+                {apiResponse.source || 'Direct Resolver'}
               </span>
             </div>
             <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
-              {apiResponse.message}
+              {apiResponse.message || 'Media successfully processed and ready to download.'}
             </p>
             <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-slate-500">
               <Calendar className="h-3 w-3" />
-              <span>Verified: {new Date(apiResponse.timestamp).toLocaleString()}</span>
+              <span>Resolved: {new Date(apiResponse.timestamp || Date.now()).toLocaleString()}</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Info notice about authorized usage */}
+      {/* Info notice */}
       <div className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-500">
         <Info className="h-3.5 w-3.5" />
-        <span>InstaSave supports retrieval of public media you own or have permission to access.</span>
+        <span>InstaSave supports public Instagram Reels, Posts, and Stories.</span>
       </div>
     </div>
   );

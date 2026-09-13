@@ -7,13 +7,19 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server/server.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "instagram-url-direct": "^2.0.7",
     "lucide-react": "^1.30.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "snapsave-media-downloader": "^2.4.1",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
