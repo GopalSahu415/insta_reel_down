@@ -13,15 +13,19 @@ export default defineConfig({
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'icons.svg', 'icons/*.svg', 'icons/*.png'],
       manifest: {
+        id: '/',
         name: 'InstaReel Pro',
         short_name: 'InstaReel Pro',
         description: 'A simple, mobile-friendly tool for downloading supported Instagram Reels.',
         theme_color: '#0B0F19',
         background_color: '#0B0F19',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
         start_url: '/',
         scope: '/',
+        prefer_related_applications: false,
+        categories: ['utilities', 'multimedia'],
         icons: [
           {
             src: '/icons/icon-192x192.png',
