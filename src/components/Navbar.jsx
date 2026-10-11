@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Download, Menu, X, ShieldCheck } from 'lucide-react';
+import InstallButton from './InstallButton';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,14 +48,16 @@ export default function Navbar() {
               Supported Formats
             </button>
             <div className="h-4 w-px bg-slate-800"></div>
+            <InstallButton variant="nav" />
             <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
               <ShieldCheck className="h-3.5 w-3.5" />
               Compliant Integration
             </div>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="flex md:hidden">
+          {/* Mobile menu button and quick install */}
+          <div className="flex items-center gap-2 md:hidden">
+            <InstallButton variant="nav" />
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center rounded-lg p-2 text-slate-400 hover:bg-slate-900 hover:text-white focus:outline-none"
@@ -88,7 +91,8 @@ export default function Navbar() {
           >
             Supported Formats
           </button>
-          <div className="border-t border-slate-800 my-2 pt-2 px-3">
+          <div className="border-t border-slate-800 my-2 pt-3 px-3 space-y-2.5">
+            <InstallButton variant="full" />
             <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
               <ShieldCheck className="h-3.5 w-3.5" />
               Compliant Integration

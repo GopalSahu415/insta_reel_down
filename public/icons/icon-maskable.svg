@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient Full Bleed -->
+    <linearGradient id="bgGradMask" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0c1b"/>
+      <stop offset="50%" stop-color="#141226"/>
+      <stop offset="100%" stop-color="#0b1120"/>
+    </linearGradient>
+
+    <!-- Neon Brand Gradient (Magenta -> Purple -> Blue) -->
+    <linearGradient id="brandGradMask" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899"/>
+      <stop offset="40%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+
+    <!-- Arrow Gradient -->
+    <linearGradient id="arrowGradMask" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+
+    <filter id="glowMask" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#a855f7" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Full Bleed Background for Android Maskable Support -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#bgGradMask)"/>
+
+  <!-- Centered Scaled Content within Safe Zone (Scale ~0.76) -->
+  <g transform="translate(61, 61) scale(0.76)">
+    <!-- Ambient Glow -->
+    <circle cx="256" cy="256" r="160" fill="url(#brandGradMask)" opacity="0.15" filter="url(#glowMask)"/>
+
+    <!-- Reel / Play Ring Accent -->
+    <g filter="url(#glowMask)">
+      <rect x="106" y="106" width="300" height="300" rx="76" fill="none" stroke="url(#brandGradMask)" stroke-width="24" stroke-linecap="round"/>
+      <circle cx="356" cy="156" r="14" fill="#ec4899"/>
+      <circle cx="156" cy="156" r="10" fill="#a855f7" opacity="0.8"/>
+    </g>
+
+    <!-- Video Play Silhouette -->
+    <path d="M196 172 C 196 162, 206 156, 215 161 L 285 201 C 294 206, 294 218, 285 223 L 215 263 C 206 268, 196 262, 196 252 Z" 
+          fill="url(#brandGradMask)" opacity="0.9"/>
+
+    <!-- Bold Download Arrow -->
+    <g>
+      <path d="M 256 195 L 256 312" stroke="url(#arrowGradMask)" stroke-width="26" stroke-linecap="round"/>
+      <path d="M 204 276 L 256 328 L 308 276" fill="none" stroke="url(#arrowGradMask)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 180 358 L 332 358" stroke="url(#brandGradMask)" stroke-width="20" stroke-linecap="round"/>
+    </g>
+
+    <!-- PRO Badge -->
+    <g transform="translate(304, 396)">
+      <rect x="0" y="0" width="88" height="34" rx="10" fill="url(#brandGradMask)"/>
+      <text x="44" y="23" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="17" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="2">PRO</text>
+    </g>
+  </g>
+</svg>
