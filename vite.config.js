@@ -11,42 +11,34 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'icons.svg', 'icons/*.svg', 'icons/*.png'],
+      manifestFilename: 'manifest.json',
+      includeAssets: ['favicon.svg', 'icons.svg', 'icon-192.png', 'icon-512.png', 'icons/*.svg', 'icons/*.png'],
       manifest: {
         id: '/',
-        name: 'InstaReel Pro',
         short_name: 'InstaReel Pro',
-        description: 'A simple, mobile-friendly tool for downloading supported Instagram Reels.',
-        theme_color: '#0B0F19',
-        background_color: '#0B0F19',
-        display: 'standalone',
-        display_override: ['standalone', 'minimal-ui'],
-        orientation: 'portrait-primary',
+        name: 'InstaReel Pro',
+        description: 'Download supported Instagram Reels with InstaReel Pro.',
         start_url: '/',
         scope: '/',
-        prefer_related_applications: false,
-        categories: ['utilities', 'multimedia'],
+        display: 'standalone',
+        orientation: 'portrait',
+        theme_color: '#7C3AED',
+        background_color: '#0B1020',
         icons: [
           {
-            src: '/icons/icon-192x192.png',
+            src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/icons/icon-512x512.png',
+            src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/icons/icon-maskable-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-            purpose: 'maskable'
-          },
-          {
-            src: '/icons/icon-maskable-512x512.png',
+            src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
