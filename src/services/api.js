@@ -20,7 +20,15 @@ export async function retrieveMediaFromApi(url) {
       body: JSON.stringify({ url }),
     });
 
-    const body = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    let body;
+    if (contentType.includes('application/json')) {
+      body = await response.json();
+    } else {
+      const text = await response.text();
+      console.error('[API Non-JSON Response]:', text);
+      throw new Error('Server returned an unexpected response. Please check the Instagram link or try again in a few seconds.');
+    }
 
     if (!response.ok) {
       throw new Error(body.message || `API error (HTTP ${response.status})`);
