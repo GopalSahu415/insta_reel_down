@@ -9,9 +9,9 @@ export default function Hero() {
       
       <div className="mx-auto max-w-5xl px-4 text-center">
         {/* Badge */}
-        <div className="mx-auto mb-6 inline-flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-900/50 px-4 py-1.5 text-sm text-slate-300 backdrop-blur-md">
-          <span className="flex h-2 w-2 rounded-full bg-fuchsia-500 animate-ping"></span>
-          <span>Compliant Media Archiving Tool</span>
+        <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-fuchsia-500/30 bg-fuchsia-500/10 px-4 py-1.5 text-xs sm:text-sm text-fuchsia-200 backdrop-blur-md shadow-lg shadow-fuchsia-500/10">
+          <span className="flex h-2 w-2 rounded-full bg-fuchsia-400 animate-ping"></span>
+          <span>⚡ Crafted with passion by <strong className="text-white font-semibold">Gopal</strong></span>
         </div>
 
         {/* Title */}
