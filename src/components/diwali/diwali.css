@@ -1,14 +1,14 @@
-/* Upgraded Vibrant Festive Diwali Styles */
+/* Upgraded Vibrant Festive Diwali Styles - Optimized for Mobile 60 FPS */
 
 @keyframes lanternSwayLeft {
   0% {
     transform: rotate(0deg);
   }
   50% {
-    transform: rotate(4deg);
+    transform: rotate(3.5deg);
   }
   100% {
-    transform: rotate(-3.5deg);
+    transform: rotate(-3deg);
   }
 }
 
@@ -17,10 +17,10 @@
     transform: rotate(0deg);
   }
   50% {
-    transform: rotate(-4deg);
+    transform: rotate(-3.5deg);
   }
   100% {
-    transform: rotate(3.5deg);
+    transform: rotate(3deg);
   }
 }
 
@@ -28,51 +28,49 @@
   0%, 100% {
     transform: scale(1) translateY(0) skewX(0deg);
     opacity: 0.95;
-    filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.95)) drop-shadow(0 0 22px rgba(255, 90, 0, 0.7));
+    filter: drop-shadow(0 0 8px rgba(255, 170, 0, 0.85));
   }
   25% {
-    transform: scale(1.1, 0.93) translateY(-1.5px) skewX(2.5deg);
+    transform: scale(1.08, 0.94) translateY(-1px) skewX(2deg);
     opacity: 1;
-    filter: drop-shadow(0 0 15px rgba(255, 215, 50, 1)) drop-shadow(0 0 28px rgba(255, 120, 0, 0.85));
+    filter: drop-shadow(0 0 12px rgba(255, 215, 50, 0.95));
   }
   50% {
-    transform: scale(0.94, 1.06) translateY(-2.5px) skewX(-2deg);
+    transform: scale(0.95, 1.05) translateY(-2px) skewX(-1.5deg);
     opacity: 0.9;
-    filter: drop-shadow(0 0 9px rgba(255, 160, 0, 0.85)) drop-shadow(0 0 18px rgba(255, 80, 0, 0.6));
+    filter: drop-shadow(0 0 7px rgba(255, 160, 0, 0.8));
   }
   75% {
-    transform: scale(1.05, 0.97) translateY(-1px) skewX(1.5deg);
+    transform: scale(1.04, 0.98) translateY(-0.8px) skewX(1deg);
     opacity: 0.98;
-    filter: drop-shadow(0 0 13px rgba(255, 200, 30, 0.98)) drop-shadow(0 0 24px rgba(255, 100, 0, 0.75));
+    filter: drop-shadow(0 0 10px rgba(255, 200, 30, 0.9));
   }
 }
 
-/* Soft moving festive background gradient (Deep royal purple, magenta, warm amber, dark indigo) */
+/* Soft moving festive background gradient */
 @keyframes ambientFestiveShift {
   0% {
     background-position: 0% 50%;
-    opacity: 0.75;
+    opacity: 0.7;
   }
   50% {
     background-position: 100% 50%;
-    opacity: 0.95;
+    opacity: 0.9;
   }
   100% {
     background-position: 0% 50%;
-    opacity: 0.75;
+    opacity: 0.7;
   }
 }
 
 @keyframes fairyLightBlink {
   0%, 100% {
     opacity: 0.45;
-    transform: scale(0.9);
-    filter: drop-shadow(0 0 3px currentColor);
+    filter: drop-shadow(0 0 2px currentColor);
   }
   50% {
     opacity: 1;
-    transform: scale(1.15);
-    filter: drop-shadow(0 0 9px currentColor) drop-shadow(0 0 18px currentColor);
+    filter: drop-shadow(0 0 6px currentColor);
   }
 }
 
@@ -87,44 +85,48 @@
 
 @keyframes festivePillGlow {
   0%, 100% {
-    box-shadow: 0 0 18px rgba(245, 158, 11, 0.35), 0 0 35px rgba(217, 70, 239, 0.2), inset 0 0 12px rgba(245, 158, 11, 0.1);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.3), 0 0 30px rgba(217, 70, 239, 0.15);
     border-color: rgba(251, 191, 36, 0.6);
   }
   50% {
-    box-shadow: 0 0 30px rgba(245, 158, 11, 0.55), 0 0 55px rgba(217, 70, 239, 0.35), inset 0 0 18px rgba(245, 158, 11, 0.2);
+    box-shadow: 0 0 25px rgba(245, 158, 11, 0.45), 0 0 45px rgba(217, 70, 239, 0.25);
     border-color: rgba(253, 224, 71, 0.85);
   }
 }
 
 @keyframes diyaReflectionGlow {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 0.55;
     transform: scale(1);
   }
   50% {
-    opacity: 0.9;
-    transform: scale(1.15);
+    opacity: 0.85;
+    transform: scale(1.1);
   }
 }
 
 .diwali-lantern-left {
   animation: lanternSwayLeft 5.5s ease-in-out infinite alternate;
   transform-origin: top center;
+  will-change: transform;
 }
 
 .diwali-lantern-right {
   animation: lanternSwayRight 6s ease-in-out infinite alternate;
   transform-origin: top center;
+  will-change: transform;
 }
 
 .diwali-diya-flame {
   animation: diyaFlicker 1.8s ease-in-out infinite;
   transform-origin: bottom center;
+  will-change: transform, opacity;
 }
 
 .diwali-ambient-glow {
   background-size: 200% 200%;
-  animation: ambientFestiveShift 14s ease-in-out infinite;
+  animation: ambientFestiveShift 16s ease-in-out infinite;
+  will-change: background-position;
 }
 
 .diwali-pill-glow {
@@ -142,6 +144,33 @@
 
 .diwali-diya-reflection {
   animation: diyaReflectionGlow 2s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+/* Mobile GPU Performance Optimizations */
+@media (max-width: 768px) {
+  .diwali-ambient-glow {
+    filter: blur(40px) !important;
+    animation: none !important; /* Static gradient on mobile saves compositor draw passes */
+    background-position: 50% 50% !important;
+  }
+
+  .diwali-pill-glow {
+    animation: none !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.35) !important;
+  }
+
+  .diwali-diya-flame {
+    filter: none !important; /* Remove expensive drop-shadow filters on mobile */
+  }
+
+  .diwali-text-shimmer {
+    animation: none !important;
+    color: #FDE68A !important;
+    -webkit-background-clip: unset !important;
+    background-clip: unset !important;
+    background: none !important;
+  }
 }
 
 /* Accessibility: Respect prefers-reduced-motion */

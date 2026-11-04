@@ -7,44 +7,38 @@ const COLOR_PALETTES = [
   {
     name: 'rainbow-festival',
     isRainbow: true,
-    colors: ['#FF1744', '#FF6D00', '#FFD700', '#10B981', '#00E5FF', '#3B82F6', '#9333EA', '#EC4899', '#FFF'],
+    colors: ['#FF1744', '#FF6D00', '#FFD700', '#10B981', '#00E5FF', '#3B82F6', '#9333EA', '#EC4899', '#FFFFFF'],
     primary: '#FFD700',
-    flash: 'rgba(255, 215, 0, 0.45)',
   },
   // 2. Royal Purple & Golden Amber
   {
     name: 'royal-purple-gold',
     colors: ['#7C3AED', '#8B5CF6', '#9333EA', '#C084FC', '#FFD700', '#F59E0B', '#FDE047', '#FFFFFF'],
     primary: '#8B5CF6',
-    flash: 'rgba(139, 92, 246, 0.42)',
   },
   // 3. Electric Cyan & Vibrant Magenta (Neon Night)
   {
     name: 'electric-cyan-magenta',
     colors: ['#00E5FF', '#22D3EE', '#06B6D4', '#E11D48', '#F43F5E', '#D946EF', '#FF4081', '#FFFFFF'],
     primary: '#00E5FF',
-    flash: 'rgba(0, 229, 255, 0.42)',
   },
   // 4. Sunset Saffron, Orange & Ruby Red
   {
     name: 'saffron-ruby',
     colors: ['#FF6D00', '#FF5722', '#F97316', '#EF4444', '#DC2626', '#FFD700', '#FFA726', '#FFF8E1'],
     primary: '#FF6D00',
-    flash: 'rgba(255, 109, 0, 0.42)',
   },
   // 5. Imperial Gold & Weeping Amber
   {
     name: 'imperial-gold',
     colors: ['#FFD700', '#FFC107', '#FFA000', '#FBBF24', '#F59E0B', '#FFF9C4', '#FFFFFF'],
     primary: '#FFD700',
-    flash: 'rgba(255, 215, 0, 0.42)',
   },
   // 6. Electric Blue & Diamond Cyan
   {
     name: 'electric-blue-cyan',
     colors: ['#2563EB', '#3B82F6', '#60A5FA', '#00E5FF', '#18FFFF', '#84FFFF', '#FFFFFF'],
     primary: '#3B82F6',
-    flash: 'rgba(37, 99, 235, 0.40)',
   },
   // 7. Cosmic Multi-Jewel
   {
@@ -52,13 +46,13 @@ const COLOR_PALETTES = [
     isRainbow: true,
     colors: ['#FF1493', '#00E5FF', '#FFD700', '#76FF03', '#9333EA', '#FF5722', '#F43F5E', '#3B82F6'],
     primary: '#FF1493',
-    flash: 'rgba(255, 20, 147, 0.42)',
   },
 ];
 
 export default function FireworksCanvas({ isEnabled = true, soundEnabled = false }) {
   const canvasRef = useRef(null);
 
+  // Sync sound setting
   useEffect(() => {
     diwaliAudio.setMuted(!soundEnabled);
   }, [soundEnabled]);
@@ -69,143 +63,225 @@ export default function FireworksCanvas({ isEnabled = true, soundEnabled = false
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    let animationFrameId = null;
-    let isTabVisible = !document.hidden;
+    // Detect Device Capabilities (Not relying solely on width)
+    const isSmallScreen = window.innerWidth < 768;
+    const isTouch = typeof navigator !== 'undefined' && (navigator.maxTouchPoints > 0 || 'ontouchstart' in window);
+    const lowCores = typeof navigator !== 'undefined' && navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+    const lowMemory = typeof navigator !== 'undefined' && navigator.deviceMemory && navigator.deviceMemory <= 4;
+    const isMobile = isSmallScreen || (isTouch && (lowCores || lowMemory));
+
     const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Dimensions & Scaling
-    let width = 0;
-    let height = 0;
-    let dpr = 1;
-    let isMobile = false;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-    const resizeCanvas = () => {
-      width = window.innerWidth;
-      height = window.innerHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      isMobile = width < 768;
+    // Mobile: Lock DPR to 1.0 to save 75% GPU fillrate and prevent lag!
+    // Desktop: Cap at 1.5 for sharpness without 4K overhead
+    const dpr = isMobile ? 1.0 : Math.min(window.devicePixelRatio || 1, 1.5);
 
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-
+    const applyCanvasSize = (w, h) => {
+      width = w;
+      height = h;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.scale(dpr, dpr);
-    };
-
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    // Visibility Listener
-    const handleVisibilityChange = () => {
-      isTabVisible = !document.hidden;
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Entity Containers
-    const rockets = [];
-    const particles = [];
-    const fallingGlitters = [];
-    const atmosphericFlashes = [];
-    const ambientSparkles = [];
-
-    // Ambient floating golden and magenta embers across the sky
-    const initAmbientSparkles = () => {
-      const count = isMobile ? 22 : 40;
-      for (let i = 0; i < count; i++) {
-        ambientSparkles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          size: Math.random() * 2.2 + 1,
-          speedY: -(Math.random() * 0.45 + 0.18),
-          speedX: Math.sin(Math.random() * Math.PI * 2) * 0.3,
-          alpha: Math.random() * 0.65 + 0.25,
-          pulse: Math.random() * Math.PI * 2,
-          color: ['#FFD700', '#F59E0B', '#EC4899', '#00E5FF'][Math.floor(Math.random() * 4)],
-        });
+      if (dpr !== 1) {
+        ctx.scale(dpr, dpr);
       }
     };
-    initAmbientSparkles();
 
-    // Rocket Spark Trail Particle (Multicolor glowing rocket tail)
-    class RocketSpark {
-      constructor(x, y, color) {
-        this.x = x + (Math.random() - 0.5) * 4;
-        this.y = y + (Math.random() - 0.5) * 4;
-        this.vx = (Math.random() - 0.5) * 1.5;
-        this.vy = Math.random() * 2.2 + 1.2; // Falls downward
-        this.alpha = 1;
-        this.decay = Math.random() * 0.05 + 0.035;
-        this.color = color;
-        this.size = Math.random() * 2.2 + 1.2;
-        this.dead = false;
-      }
+    applyCanvasSize(width, height);
 
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.alpha -= this.decay;
-        if (this.alpha <= 0) this.dead = true;
+    // Prevent excessive resizing from mobile address-bar hide/show
+    const handleResize = () => {
+      const newW = window.innerWidth;
+      const newH = window.innerHeight;
+      if (Math.abs(newW - width) > 30 || Math.abs(newH - height) > 120) {
+        applyCanvasSize(newW, newH);
       }
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
 
-      draw() {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, this.alpha);
-        ctx.fillStyle = this.color;
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = 6;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
+    // Scroll throttle: pause new launches during fast mobile scrolling to keep UI 60 FPS
+    let isScrolling = false;
+    let scrollTimeout = null;
+    const handleScroll = () => {
+      if (!isMobile) return;
+      isScrolling = true;
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        isScrolling = false;
+      }, 160);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // -------------------------------------------------------------------------
+    // High-Performance Object Pooling (Zero allocations during animation loop)
+    // -------------------------------------------------------------------------
+    const MAX_PARTICLES = isMobile ? 70 : 260;
+    const particlePool = [];
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+      particlePool.push({
+        active: false,
+        x: 0,
+        y: 0,
+        prevX: 0,
+        prevY: 0,
+        vx: 0,
+        vy: 0,
+        color: '#FFD700',
+        size: 2,
+        alpha: 1,
+        decay: 0.01,
+        friction: 0.965,
+        gravity: 0.05,
+        isCascading: false,
+        isStrobe: false,
+        strobeTick: 0,
+        canCrackle: false,
+        crackleAge: 0,
+      });
     }
 
-    // Rocket Class
+    const spawnPooledParticle = (options) => {
+      for (let i = 0; i < MAX_PARTICLES; i++) {
+        const p = particlePool[i];
+        if (!p.active) {
+          p.active = true;
+          p.x = options.x;
+          p.y = options.y;
+          p.prevX = options.x;
+          p.prevY = options.y;
+          p.vx = options.vx;
+          p.vy = options.vy;
+          p.color = options.color;
+          p.size = options.size || 2.2;
+          p.alpha = 1;
+          p.decay = options.decay || 0.012;
+          p.friction = options.friction || 0.965;
+          p.gravity = options.gravity !== undefined ? options.gravity : 0.05;
+          p.isCascading = options.isCascading || false;
+          p.isStrobe = options.isStrobe || false;
+          p.strobeTick = 0;
+          p.canCrackle = options.canCrackle || false;
+          p.crackleAge = 0;
+          return p;
+        }
+      }
+      return null;
+    };
+
+    // Falling Golden Glitter Pool
+    const MAX_GLITTERS = isMobile ? 8 : 28;
+    const glitterPool = [];
+    for (let i = 0; i < MAX_GLITTERS; i++) {
+      glitterPool.push({
+        active: false,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        swayOffset: 0,
+        size: 1.2,
+        alpha: 1,
+        decay: 0.008,
+        tick: 0,
+        color: '#FFD700',
+      });
+    }
+
+    const spawnPooledGlitter = (x, y) => {
+      for (let i = 0; i < MAX_GLITTERS; i++) {
+        const g = glitterPool[i];
+        if (!g.active) {
+          g.active = true;
+          g.x = x + (Math.random() - 0.5) * 45;
+          g.y = y + (Math.random() - 0.5) * 30;
+          g.vx = (Math.random() - 0.5) * 0.6;
+          g.vy = Math.random() * 0.55 + 0.35;
+          g.swayOffset = Math.random() * Math.PI * 2;
+          g.size = Math.random() * 1.5 + 0.9;
+          g.alpha = 1;
+          g.decay = Math.random() * 0.009 + 0.006;
+          g.tick = 0;
+          g.color = Math.random() > 0.3 ? '#FFD700' : '#FFF9C4';
+          return g;
+        }
+      }
+      return null;
+    };
+
+    // Rockets container (Limit: 1 on mobile, 3 on desktop)
+    const MAX_ROCKETS = isMobile ? 1 : 3;
+    const rockets = [];
+
+    // Flash container
+    let activeFlash = null;
+
+    // Ambient floating golden embers across the sky
+    const ambientSparkles = [];
+    const ambientCount = isMobile ? 12 : 28;
+    for (let i = 0; i < ambientCount; i++) {
+      ambientSparkles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 2 + 1,
+        speedY: -(Math.random() * 0.4 + 0.15),
+        speedX: Math.sin(Math.random() * Math.PI * 2) * 0.2,
+        alpha: Math.random() * 0.55 + 0.2,
+        pulse: Math.random() * Math.PI * 2,
+        color: ['#FFD700', '#F59E0B', '#EC4899', '#00E5FF'][i % 4],
+      });
+    }
+
+    // Rocket Class with optimized spark trail
     class Rocket {
       constructor(targetX, targetY, isLarge = false, customPalette = null) {
-        this.x = targetX !== undefined && targetX !== null ? targetX : (Math.random() * 0.84 + 0.08) * width;
-        this.y = height + 15;
-        this.targetY = targetY || (Math.random() * 0.35 + 0.08) * height;
+        this.x = targetX !== undefined && targetX !== null ? targetX : (Math.random() * 0.8 + 0.1) * width;
+        this.y = height + 10;
+        this.prevX = this.x;
+        this.prevY = this.y;
+        this.targetY = targetY || (Math.random() * 0.32 + 0.1) * height;
         this.isLarge = isLarge;
         this.palette = customPalette || COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
 
-        // Compute upward velocity based on target height & gravity
         const gravity = 0.18;
         const deltaY = this.y - this.targetY;
         const initialSpeed = Math.sqrt(2 * gravity * deltaY);
         this.vy = -initialSpeed * (0.98 + Math.random() * 0.04);
-        this.vx = (Math.random() - 0.5) * 1.6;
+        this.vx = (Math.random() - 0.5) * 1.4;
         this.gravity = gravity;
-
-        // Visual trails
-        this.trail = [];
-        this.maxTrailLength = isMobile ? 6 : 9;
         this.dead = false;
 
-        // Audio whoosh
         diwaliAudio.playLaunch();
       }
 
       update() {
-        this.trail.push({ x: this.x, y: this.y });
-        if (this.trail.length > this.maxTrailLength) {
-          this.trail.shift();
-        }
-
+        this.prevX = this.x;
+        this.prevY = this.y;
         this.x += this.vx;
         this.y += this.vy;
         this.vy += this.gravity;
         this.vx *= 0.99;
 
-        // Spawn colorful rocket sparks
-        if (Math.random() > 0.2) {
-          const sparkColor = Math.random() > 0.4 ? this.palette.primary : '#FFD700';
-          particles.push(new RocketSpark(this.x, this.y, sparkColor));
+        // Occasional trailing spark (spawns into particle pool)
+        if (!isMobile && Math.random() > 0.4) {
+          spawnPooledParticle({
+            x: this.x + (Math.random() - 0.5) * 3,
+            y: this.y + (Math.random() - 0.5) * 3,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: Math.random() * 1.8 + 0.8,
+            color: this.palette.primary,
+            size: 1.4,
+            decay: 0.06,
+            friction: 0.96,
+            gravity: 0.04,
+          });
         }
 
-        // Explode upon reaching target height or near zero vertical speed
         if (this.y <= this.targetY || this.vy >= -0.7) {
           this.explode();
           this.dead = true;
@@ -213,449 +289,184 @@ export default function FireworksCanvas({ isEnabled = true, soundEnabled = false
       }
 
       draw() {
-        if (this.trail.length < 2) return;
-        ctx.save();
         ctx.beginPath();
-        ctx.moveTo(this.trail[0].x, this.trail[0].y);
-        for (let i = 1; i < this.trail.length; i++) {
-          ctx.lineTo(this.trail[i].x, this.trail[i].y);
-        }
+        ctx.moveTo(this.prevX, this.prevY);
+        ctx.lineTo(this.x, this.y);
         ctx.strokeStyle = '#FFE082';
-        ctx.lineWidth = this.isLarge ? 3.5 : 2.2;
-        ctx.shadowColor = this.palette.primary;
-        ctx.shadowBlur = 12;
+        ctx.lineWidth = isMobile ? 1.8 : 2.4;
         ctx.stroke();
 
-        // Glowing rocket head
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.isLarge ? 4 : 2.8, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, isMobile ? 2.2 : 3, 0, Math.PI * 2);
         ctx.fillStyle = '#FFFFFF';
-        ctx.shadowColor = '#FFD700';
-        ctx.shadowBlur = 16;
         ctx.fill();
-        ctx.restore();
       }
 
       explode() {
-        const patternTypes = ['rainbowBurst', 'cascading', 'starburst', 'ring', 'circular', 'crackler'];
-        let pattern = patternTypes[Math.floor(Math.random() * patternTypes.length)];
-        if (this.isLarge) pattern = Math.random() > 0.4 ? 'rainbowBurst' : 'cascading';
-
-        createExplosion(this.x, this.y, this.palette, pattern, this.isLarge, isMobile);
+        const patterns = ['rainbowBurst', 'cascading', 'starburst', 'ring', 'circular', 'crackler'];
+        let pattern = patterns[Math.floor(Math.random() * patterns.length)];
+        if (this.isLarge && !isMobile) pattern = Math.random() > 0.5 ? 'rainbowBurst' : 'cascading';
+        createExplosion(this.x, this.y, this.palette, pattern, this.isLarge);
       }
     }
 
-    // Explosion Particle Class
-    class Particle {
-      constructor(options) {
-        this.x = options.x;
-        this.y = options.y;
-        this.vx = options.vx;
-        this.vy = options.vy;
-        this.color = options.color;
-        this.size = options.size || (Math.random() * 2.4 + 1.8);
-        this.alpha = 1;
-        this.decay = options.decay || (Math.random() * 0.012 + 0.008);
-        this.friction = options.friction || 0.965;
-        this.gravity = options.gravity !== undefined ? options.gravity : 0.055;
-        this.trail = [];
-        this.maxTrail = options.maxTrail || (isMobile ? 3 : 5);
-        this.isCascading = options.isCascading || false;
-        this.isStrobe = options.isStrobe || false;
-        this.strobeTick = 0;
-        this.canCrackle = options.canCrackle || false;
-        this.crackleAge = 0;
-        this.dead = false;
-      }
-
-      update() {
-        this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
-        if (this.trail.length > this.maxTrail) {
-          this.trail.shift();
-        }
-
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vx *= this.friction;
-        this.vy *= this.friction;
-        this.vy += this.gravity;
-        this.alpha -= this.decay;
-
-        if (this.isStrobe) {
-          this.strobeTick++;
-        }
-
-        // Secondary Crackling pop effect
-        if (this.canCrackle) {
-          this.crackleAge++;
-          if (this.crackleAge > 26 && Math.random() > 0.85) {
-            spawnCrackleBurst(this.x, this.y, this.color);
-            this.canCrackle = false;
-          }
-        }
-
-        if (this.alpha <= 0) {
-          this.dead = true;
-        }
-      }
-
-      draw() {
-        ctx.save();
-        let displayAlpha = this.alpha;
-        if (this.isStrobe && (this.strobeTick % 4 < 2)) {
-          displayAlpha *= 0.2;
-        }
-
-        // 1. Draw glowing comet trail
-        if (this.trail.length > 1) {
-          ctx.beginPath();
-          ctx.moveTo(this.trail[0].x, this.trail[0].y);
-          for (let i = 1; i < this.trail.length; i++) {
-            ctx.lineTo(this.trail[i].x, this.trail[i].y);
-          }
-          ctx.strokeStyle = this.color;
-          ctx.lineWidth = this.isCascading ? 2.4 : 1.6;
-          ctx.globalAlpha = Math.max(0, displayAlpha * (this.isCascading ? 0.8 : 0.55));
-          ctx.stroke();
-        }
-
-        // 2. Draw particle head
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = Math.max(0, displayAlpha);
-        ctx.shadowColor = this.color;
-        ctx.shadowBlur = this.isCascading ? 14 : 9;
-        ctx.fill();
-
-        ctx.restore();
-      }
-    }
-
-    // Falling Golden Glitter Class (Lingering slow-falling glittering dust)
-    class FallingGlitter {
-      constructor(x, y) {
-        this.x = x + (Math.random() - 0.5) * 60;
-        this.y = y + (Math.random() - 0.5) * 40;
-        this.vx = (Math.random() - 0.5) * 0.8;
-        this.vy = Math.random() * 0.6 + 0.35; // Gentle slow descent
-        this.swayOffset = Math.random() * Math.PI * 2;
-        this.size = Math.random() * 1.8 + 0.9;
-        this.alpha = 1;
-        this.decay = Math.random() * 0.009 + 0.006;
-        this.tick = 0;
-        this.color = Math.random() > 0.35 ? '#FFD700' : '#FFF9C4';
-        this.dead = false;
-      }
-
-      update() {
-        this.tick += 0.06;
-        this.x += this.vx + Math.sin(this.tick + this.swayOffset) * 0.45;
-        this.y += this.vy;
-        this.alpha -= this.decay;
-        if (this.alpha <= 0) this.dead = true;
-      }
-
-      draw() {
-        ctx.save();
-        const flicker = 0.5 + 0.5 * Math.sin(this.tick * 4);
-        ctx.globalAlpha = Math.max(0, this.alpha * flicker);
-        ctx.fillStyle = this.color;
-        ctx.shadowColor = '#FFD700';
-        ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    // Atmospheric flash on detonation
-    class AtmosphericFlash {
-      constructor(x, y, color) {
-        this.x = x;
-        this.y = y;
-        this.radius = 16;
-        this.maxRadius = isMobile ? 160 : 250;
-        this.color = color || 'rgba(255, 215, 0, 0.4)';
-        this.alpha = 0.4;
-        this.dead = false;
-      }
-
-      update() {
-        this.radius += (this.maxRadius - this.radius) * 0.22;
-        this.alpha -= 0.045;
-        if (this.alpha <= 0) this.dead = true;
-      }
-
-      draw() {
-        ctx.save();
-        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
-        grad.addColorStop(0, this.color);
-        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = grad;
-        ctx.globalAlpha = Math.max(0, this.alpha);
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    // Secondary micro-crackles
-    const spawnCrackleBurst = (x, y, color) => {
-      diwaliAudio.playCrackle();
-      const count = isMobile ? 3 : 6;
-      for (let i = 0; i < count; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 2.8 + 0.6;
-        particles.push(
-          new Particle({
-            x,
-            y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            color: Math.random() > 0.5 ? '#FFFFFF' : color,
-            size: Math.random() * 1.6 + 0.8,
-            decay: Math.random() * 0.04 + 0.03,
-            friction: 0.94,
-            gravity: 0.035,
-            maxTrail: 2,
-            isStrobe: true,
-          })
-        );
-      }
-    };
-
-    // Primary Explosion Generator
-    const createExplosion = (x, y, palette, pattern, isLarge, mobileMode) => {
+    // Explosion Generator: strictly enforcing particle limits
+    const createExplosion = (x, y, palette, pattern, isLarge) => {
       diwaliAudio.playExplosion(isLarge);
-      atmosphericFlashes.push(new AtmosphericFlash(x, y, palette.flash));
 
-      let baseCount = isLarge ? 175 : 95;
-      if (mobileMode) baseCount = Math.floor(baseCount * 0.55);
+      // Light flash (simple circle without expensive radial gradients on mobile)
+      activeFlash = {
+        x,
+        y,
+        radius: 12,
+        maxRadius: isMobile ? 90 : 160,
+        color: palette.primary,
+        alpha: isMobile ? 0.25 : 0.35,
+      };
+
+      // Strict Particle Limits:
+      // Mobile: 25–45 particles per explosion
+      // Desktop: 80–120 particles per explosion
+      let count;
+      if (isMobile) {
+        count = Math.floor(Math.random() * 16) + 26; // 26 to 41 particles
+      } else {
+        count = isLarge ? 120 : (Math.floor(Math.random() * 30) + 85); // 85 to 120 particles
+      }
 
       const colors = palette.colors;
 
-      // Occasional falling golden glitter shower
-      const glitterCount = isLarge ? (mobileMode ? 18 : 36) : (mobileMode ? 10 : 20);
+      // Golden Glitter Shower: 4-6 on mobile, 14-22 on desktop
+      const glitterCount = isMobile ? 4 : 16;
       for (let i = 0; i < glitterCount; i++) {
-        fallingGlitters.push(new FallingGlitter(x, y));
+        spawnPooledGlitter(x, y);
       }
 
       switch (pattern) {
-        // Spectacular Rainbow / Multicolor Burst
+        // 1. Rainbow / Multicolor Burst
         case 'rainbowBurst': {
-          const count = isLarge ? (mobileMode ? 100 : 210) : (mobileMode ? 60 : 130);
           const rainbowColors = [
             '#FF1744', '#FF5722', '#FFD700', '#10B981',
-            '#00E5FF', '#3B82F6', '#8B5CF6', '#EC4899', '#FFFFFF'
+            '#00E5FF', '#3B82F6', '#8B5CF6', '#EC4899', '#FFFFFF',
           ];
           for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * (isLarge ? 8.5 : 6.8) + 1.6;
+            const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.2;
+            const speed = Math.random() * (isMobile ? 5.2 : 7.2) + 1.2;
             const color = rainbowColors[i % rainbowColors.length];
-            particles.push(
-              new Particle({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color,
-                size: Math.random() * 2.8 + 1.6,
-                decay: Math.random() * 0.012 + 0.008,
-                friction: 0.966,
-                gravity: 0.05,
-                isStrobe: Math.random() > 0.65,
-                canCrackle: Math.random() > 0.7,
-              })
-            );
+            spawnPooledParticle({
+              x,
+              y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              color,
+              size: isMobile ? 1.8 : 2.4,
+              decay: isMobile ? 0.018 : 0.011,
+              friction: 0.965,
+              gravity: 0.05,
+              isStrobe: !isMobile && Math.random() > 0.7,
+            });
           }
           break;
         }
 
-        // Cascading Waterfall / Weeping Willow
+        // 2. Cascading Waterfall / Weeping Willow
         case 'cascading': {
-          const count = isLarge ? (mobileMode ? 100 : 185) : (mobileMode ? 55 : 110);
           for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 6.8 + 1.5;
+            const speed = Math.random() * (isMobile ? 5.0 : 6.4) + 1.2;
             const chosenColor = palette.isRainbow
               ? colors[i % colors.length]
               : Math.random() > 0.25 ? palette.primary : '#FFF9C4';
-            particles.push(
-              new Particle({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed * 0.7 - 1.2,
-                color: chosenColor,
-                size: Math.random() * 2.4 + 1.5,
-                decay: Math.random() * 0.007 + 0.006, // Long cascading hang time
-                friction: 0.972,
-                gravity: 0.068, // Flowing waterfall rain
-                maxTrail: mobileMode ? 4 : 7,
-                isCascading: true,
-              })
-            );
+            spawnPooledParticle({
+              x,
+              y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed * 0.7 - 0.8,
+              color: chosenColor,
+              size: isMobile ? 1.8 : 2.2,
+              decay: isMobile ? 0.016 : 0.009,
+              friction: 0.97,
+              gravity: 0.065,
+              isCascading: true,
+            });
           }
           break;
         }
 
-        // Expanding Ring with Contrasting Nucleus
+        // 3. Ring with Center Star
         case 'ring': {
-          const ringCount = mobileMode ? 38 : 70;
-          const ringColor = palette.primary;
-          const ringSpeed = isLarge ? 7.5 : 5.5;
+          const ringCount = Math.floor(count * 0.75);
+          const ringSpeed = isMobile ? 4.5 : 5.8;
           for (let i = 0; i < ringCount; i++) {
-            const angle = (i / ringCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.08;
-            const speed = ringSpeed + (Math.random() - 0.5) * 0.35;
-            particles.push(
-              new Particle({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color: ringColor,
-                size: 2.4,
-                decay: 0.011,
-                friction: 0.965,
-                gravity: 0.048,
-              })
-            );
+            const angle = (i / ringCount) * Math.PI * 2;
+            spawnPooledParticle({
+              x,
+              y,
+              vx: Math.cos(angle) * ringSpeed,
+              vy: Math.sin(angle) * ringSpeed,
+              color: palette.primary,
+              size: 2.0,
+              decay: isMobile ? 0.018 : 0.012,
+              friction: 0.965,
+              gravity: 0.048,
+            });
           }
           // Inner core
-          const coreCount = mobileMode ? 18 : 34;
-          const coreColor = palette.isRainbow ? '#00E5FF' : (colors[1] || '#FFFFFF');
+          const coreCount = count - ringCount;
           for (let i = 0; i < coreCount; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 3.2 + 0.6;
-            particles.push(
-              new Particle({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color: coreColor,
-                size: 2.0,
-                decay: 0.015,
-                friction: 0.95,
-                gravity: 0.04,
-                isStrobe: true,
-              })
-            );
+            const speed = Math.random() * 2.5 + 0.5;
+            spawnPooledParticle({
+              x,
+              y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              color: '#FFFFFF',
+              size: 1.6,
+              decay: 0.02,
+              friction: 0.95,
+              gravity: 0.04,
+              isStrobe: true,
+            });
           }
           break;
         }
 
-        // Crackling Strobe Palm
-        case 'crackler': {
-          const count = mobileMode ? 42 : 85;
-          for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 7.5 + 2.2;
-            particles.push(
-              new Particle({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color: colors[i % colors.length],
-                size: 2.5,
-                decay: 0.011,
-                friction: 0.962,
-                gravity: 0.055,
-                canCrackle: true,
-              })
-            );
-          }
-          break;
-        }
-
-        // Starburst with Radial Comets
-        case 'starburst': {
-          const count = baseCount;
-          const raySpokes = isLarge ? 14 : 10;
-          for (let i = 0; i < count; i++) {
-            // Clustered along spokes with spread
-            const spokeIndex = Math.floor(Math.random() * raySpokes);
-            const spokeAngle = (spokeIndex / raySpokes) * Math.PI * 2;
-            const angle = spokeAngle + (Math.random() - 0.5) * 0.25;
-            const speed = Math.random() * (isLarge ? 8 : 6.2) + 1.8;
-            particles.push(
-              new Particle({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color: colors[i % colors.length],
-                size: Math.random() * 2.6 + 1.5,
-                decay: Math.random() * 0.013 + 0.009,
-                friction: 0.965,
-                gravity: 0.05,
-                maxTrail: mobileMode ? 4 : 6,
-                isStrobe: Math.random() > 0.6,
-              })
-            );
-          }
-          break;
-        }
-
-        // Uniform Circular Explosion
+        // 4. Starburst or Circular Burst
+        case 'starburst':
         case 'circular':
+        case 'crackler':
         default: {
-          const count = baseCount;
           for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * (isLarge ? 7.6 : 5.8) + 1.4;
-            particles.push(
-              new Particle({
-                x,
-                y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                color: colors[i % colors.length],
-                size: Math.random() * 2.4 + 1.4,
-                decay: Math.random() * 0.013 + 0.009,
-                friction: 0.965,
-                gravity: 0.05,
-                isStrobe: Math.random() > 0.7,
-              })
-            );
+            const speed = Math.random() * (isMobile ? 5.5 : 6.8) + 1.2;
+            spawnPooledParticle({
+              x,
+              y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              color: colors[i % colors.length],
+              size: isMobile ? 1.8 : 2.2,
+              decay: isMobile ? 0.018 : 0.012,
+              friction: 0.965,
+              gravity: 0.05,
+              isStrobe: !isMobile && Math.random() > 0.7,
+              canCrackle: !isMobile && Math.random() > 0.8,
+            });
           }
           break;
         }
-      }
-
-      // Shimmering micro-glitter halo around epicenter
-      const haloCount = mobileMode ? 18 : 35;
-      for (let i = 0; i < haloCount; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const speed = Math.random() * 2.4 + 0.4;
-        particles.push(
-          new Particle({
-            x: x + (Math.random() - 0.5) * 16,
-            y: y + (Math.random() - 0.5) * 16,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed,
-            color: '#FFF8E1',
-            size: Math.random() * 1.5 + 0.8,
-            decay: Math.random() * 0.02 + 0.01,
-            friction: 0.95,
-            gravity: 0.03,
-            isStrobe: true,
-          })
-        );
       }
     };
 
     // Scheduled Launch Timers
     let lastLaunchTime = Date.now();
-    let nextLaunchDelay = 750 + Math.random() * 850;
-    let salvoTimer = 0;
-    let grandFinaleTimer = 0;
+    // Mobile: Spaced launches (2.2s - 2.8s) to allow previous to finish smoothly
+    // Desktop: 900ms - 1500ms
+    let nextLaunchDelay = isMobile ? 2400 : (900 + Math.random() * 600);
+    let salvoCounter = 0;
 
-    // Interactive Tap/Click Handler (Triggers immediate colorful firework at clicked spot)
+    // Interactive Tap to Burst Handler (Immediate explosion at tapped spot)
     const handleWindowClick = (e) => {
       if (!isEnabled) return;
       const target = e.target;
@@ -673,47 +484,57 @@ export default function FireworksCanvas({ isEnabled = true, soundEnabled = false
       const clickX = e.clientX - rect.left;
       const clickY = e.clientY - rect.top;
 
-      // Trigger if click is anywhere in the upper 80% of the screen
       if (clickY < height * 0.82) {
-        // Pick a random vibrant palette for each tap
         const randomPalette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
-        const patterns = ['rainbowBurst', 'cascading', 'starburst', 'ring', 'crackler'];
+        const patterns = ['rainbowBurst', 'cascading', 'starburst', 'ring'];
         const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
 
-        // Immediate spectacular explosion at exact tap coordinate!
-        createExplosion(clickX, clickY, randomPalette, randomPattern, true, isMobile);
+        createExplosion(clickX, clickY, randomPalette, randomPattern, !isMobile);
       }
     };
 
     window.addEventListener('click', handleWindowClick);
 
-    // Main Animation Loop
+    // -------------------------------------------------------------------------
+    // Guaranteed Single Animation Loop (No duplicate loops, full pause on inactive)
+    // -------------------------------------------------------------------------
+    let animFrameId = null;
+    let isLoopActive = false;
     let lastFrameTime = performance.now();
-    let performanceThrottled = false;
+    let frameCount = 0;
+    let fpsAccumulator = 0;
+    let dynamicQualityDrop = false;
 
     const render = (currentTime) => {
-      animationFrameId = requestAnimationFrame(render);
+      if (!isLoopActive) return;
 
-      // Handle Tab Inactivity or Disabled State
-      if (!isTabVisible || !isEnabled) {
-        lastFrameTime = currentTime;
-        return;
+      animFrameId = requestAnimationFrame(render);
+
+      // Adaptive Performance Monitoring (Rolling 30-frame average FPS)
+      const delta = currentTime - lastFrameTime;
+      lastFrameTime = currentTime;
+
+      frameCount++;
+      fpsAccumulator += delta;
+      if (frameCount >= 30) {
+        const avgFps = 1000 / (fpsAccumulator / 30);
+        dynamicQualityDrop = avgFps < 45; // If drops below 45 FPS, throttle particles
+        frameCount = 0;
+        fpsAccumulator = 0;
       }
 
-      const frameDelta = currentTime - lastFrameTime;
-      lastFrameTime = currentTime;
-      performanceThrottled = frameDelta > 28;
-
-      // Clear canvas cleanly without obscuring underlying UI
+      // Fast Canvas Clear
       ctx.clearRect(0, 0, width, height);
+
+      // Additive Incandescent Blend Mode
       ctx.globalCompositeOperation = 'lighter';
 
-      // 1. Draw Ambient Floating Embers
+      // 1. Ambient Floating Embers
       if (!isReducedMotion) {
         for (let i = 0; i < ambientSparkles.length; i++) {
           const s = ambientSparkles[i];
           s.y += s.speedY;
-          s.x += s.speedX + Math.sin(s.pulse) * 0.25;
+          s.x += s.speedX + Math.sin(s.pulse) * 0.2;
           s.pulse += 0.03;
 
           if (s.y < -10) {
@@ -722,73 +543,78 @@ export default function FireworksCanvas({ isEnabled = true, soundEnabled = false
           }
 
           const currentAlpha = s.alpha * (0.6 + 0.4 * Math.sin(s.pulse));
-          ctx.save();
-          ctx.globalAlpha = Math.max(0, currentAlpha);
-          ctx.fillStyle = s.color;
-          ctx.shadowColor = s.color;
-          ctx.shadowBlur = 8;
           ctx.beginPath();
           ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fillStyle = s.color;
+          ctx.globalAlpha = Math.max(0, currentAlpha);
           ctx.fill();
-          ctx.restore();
         }
       }
 
       // 2. Continuous Fireworks Scheduling
-      if (!isReducedMotion && !performanceThrottled) {
+      if (!isReducedMotion && !isScrolling) {
         const now = Date.now();
-
         if (now - lastLaunchTime > nextLaunchDelay) {
           lastLaunchTime = now;
-          nextLaunchDelay = 800 + Math.random() * 1100;
+          nextLaunchDelay = isMobile
+            ? (dynamicQualityDrop ? 3000 : 2200 + Math.random() * 600)
+            : (900 + Math.random() * 800);
 
-          // Single rocket launch
-          rockets.push(new Rocket());
+          // On mobile: strictly max 1 rocket at a time!
+          if (rockets.length < MAX_ROCKETS) {
+            rockets.push(new Rocket());
 
-          // Simultaneous Salvos (2 or 3 fireworks bursting together)
-          salvoTimer++;
-          if (salvoTimer % 4 === 0) {
-            const leftX = width * (0.15 + Math.random() * 0.2);
-            const rightX = width * (0.65 + Math.random() * 0.2);
-            rockets.push(new Rocket(leftX));
-            setTimeout(() => {
-              if (isEnabled && isTabVisible) {
-                rockets.push(new Rocket(rightX));
+            // Simultaneous Salvos ONLY on desktop when FPS is healthy
+            if (!isMobile && !dynamicQualityDrop) {
+              salvoCounter++;
+              if (salvoCounter % 5 === 0) {
+                const rightX = width * (0.65 + Math.random() * 0.2);
+                setTimeout(() => {
+                  if (isLoopActive && rockets.length < MAX_ROCKETS) {
+                    rockets.push(new Rocket(rightX));
+                  }
+                }, 140);
               }
-            }, 120);
-          }
-
-          // Triple Grand Salvo
-          grandFinaleTimer++;
-          if (grandFinaleTimer % 10 === 0) {
-            const x1 = width * 0.22;
-            const x2 = width * 0.5;
-            const x3 = width * 0.78;
-            rockets.push(new Rocket(x1, height * 0.22, true));
-            setTimeout(() => {
-              if (isEnabled && isTabVisible) rockets.push(new Rocket(x2, height * 0.14, true));
-            }, 180);
-            setTimeout(() => {
-              if (isEnabled && isTabVisible) rockets.push(new Rocket(x3, height * 0.24, true));
-            }, 360);
+            }
           }
         }
       }
 
-      // 3. Update & Draw Atmospheric Detonation Flashes
-      for (let i = atmosphericFlashes.length - 1; i >= 0; i--) {
-        const flash = atmosphericFlashes[i];
-        flash.update();
-        flash.draw();
-        if (flash.dead) atmosphericFlashes.splice(i, 1);
+      // 3. Detonation Flash (Fast circle)
+      if (activeFlash) {
+        activeFlash.radius += (activeFlash.maxRadius - activeFlash.radius) * 0.25;
+        activeFlash.alpha -= 0.05;
+        if (activeFlash.alpha <= 0) {
+          activeFlash = null;
+        } else {
+          ctx.beginPath();
+          ctx.arc(activeFlash.x, activeFlash.y, activeFlash.radius, 0, Math.PI * 2);
+          ctx.fillStyle = activeFlash.color;
+          ctx.globalAlpha = Math.max(0, activeFlash.alpha);
+          ctx.fill();
+        }
       }
 
-      // 4. Update & Draw Falling Golden Glitter Shower
-      for (let i = fallingGlitters.length - 1; i >= 0; i--) {
-        const g = fallingGlitters[i];
-        g.update();
-        g.draw();
-        if (g.dead) fallingGlitters.splice(i, 1);
+      // 4. Falling Golden Glitter Shower
+      for (let i = 0; i < MAX_GLITTERS; i++) {
+        const g = glitterPool[i];
+        if (g.active) {
+          g.tick += 0.06;
+          g.x += g.vx + Math.sin(g.tick + g.swayOffset) * 0.4;
+          g.y += g.vy;
+          g.alpha -= g.decay;
+
+          if (g.alpha <= 0 || g.y > height + 20) {
+            g.active = false;
+          } else {
+            const flicker = 0.5 + 0.5 * Math.sin(g.tick * 4);
+            ctx.beginPath();
+            ctx.arc(g.x, g.y, g.size, 0, Math.PI * 2);
+            ctx.fillStyle = g.color;
+            ctx.globalAlpha = Math.max(0, g.alpha * flicker);
+            ctx.fill();
+          }
+        }
       }
 
       // 5. Update & Draw Ascending Rockets
@@ -796,27 +622,99 @@ export default function FireworksCanvas({ isEnabled = true, soundEnabled = false
         const r = rockets[i];
         r.update();
         r.draw();
-        if (r.dead) rockets.splice(i, 1);
+        if (r.dead) {
+          rockets.splice(i, 1);
+        }
       }
 
-      // 6. Update & Draw Exploding Particles
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.update();
-        p.draw();
-        if (p.dead) particles.splice(i, 1);
+      // 6. Update & Draw Exploding Particles (Fast stroke trail + arc head)
+      for (let i = 0; i < MAX_PARTICLES; i++) {
+        const p = particlePool[i];
+        if (p.active) {
+          p.prevX = p.x;
+          p.prevY = p.y;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= p.friction;
+          p.vy *= p.friction;
+          p.vy += p.gravity;
+          p.alpha -= p.decay;
+
+          if (p.isStrobe) p.strobeTick++;
+
+          if (p.alpha <= 0 || p.y > height + 40) {
+            p.active = false;
+          } else {
+            let displayAlpha = p.alpha;
+            if (p.isStrobe && (p.strobeTick % 4 < 2)) {
+              displayAlpha *= 0.2;
+            }
+
+            // Draw comet trail line
+            ctx.beginPath();
+            ctx.moveTo(p.prevX, p.prevY);
+            ctx.lineTo(p.x, p.y);
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = p.isCascading ? 2.2 : 1.6;
+            ctx.globalAlpha = Math.max(0, displayAlpha * (p.isCascading ? 0.75 : 0.5));
+            ctx.stroke();
+
+            // Draw glowing particle head
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = Math.max(0, displayAlpha);
+            ctx.fill();
+          }
+        }
       }
 
       ctx.globalCompositeOperation = 'source-over';
     };
 
-    animationFrameId = requestAnimationFrame(render);
+    // Single Loop Controller
+    const startLoop = () => {
+      if (isLoopActive) return;
+      isLoopActive = true;
+      lastFrameTime = performance.now();
+      animFrameId = requestAnimationFrame(render);
+    };
 
+    const stopLoop = () => {
+      if (!isLoopActive) return;
+      isLoopActive = false;
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+    };
+
+    // Visibility Listener: Completely stop animation when tab is inactive
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopLoop();
+      } else if (isEnabled) {
+        startLoop();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Initial Start if enabled
+    if (isEnabled && !document.hidden) {
+      startLoop();
+    } else {
+      ctx.clearRect(0, 0, width, height);
+    }
+
+    // Comprehensive Cleanup on unmount or when isEnabled changes
     return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resizeCanvas);
+      stopLoop();
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('click', handleWindowClick);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearTimeout(scrollTimeout);
+      ctx.clearRect(0, 0, width, height);
     };
   }, [isEnabled]);
 

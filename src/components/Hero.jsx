@@ -4,8 +4,8 @@ import UrlInput from './UrlInput';
 export default function Hero() {
   return (
     <section className="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24">
-      {/* Background Glow Elements */}
-      <div className="absolute top-1/4 left-1/2 -z-10 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-purple-600/15 via-pink-600/10 to-amber-600/15 blur-[120px] pointer-events-none"></div>
+      {/* Background Glow Elements - Optimized blur for mobile */}
+      <div className="absolute top-1/4 left-1/2 -z-10 h-[300px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr from-purple-600/15 via-pink-600/10 to-amber-600/15 blur-[50px] md:blur-[120px] pointer-events-none"></div>
       
       <div className="mx-auto max-w-5xl px-4 text-center">
         {/* Festive Golden-Purple Badge */}
