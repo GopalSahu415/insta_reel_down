@@ -5,10 +5,14 @@ import SupportedMedia from './components/SupportedMedia';
 import HowItWorks from './components/HowItWorks';
 import About from './components/About';
 import Footer from './components/Footer';
+import DiwaliExperience from './components/diwali/DiwaliExperience';
 
 function App() {
   return (
     <div className="min-h-screen bg-[#0B0F19] text-slate-100 selection:bg-fuchsia-500 selection:text-white font-sans antialiased overflow-x-hidden">
+      {/* Flipkart-Inspired Diwali Fireworks & Festive Experience Layer */}
+      <DiwaliExperience />
+
       {/* Navigation */}
       <Navbar />
 

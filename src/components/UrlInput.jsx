@@ -47,9 +47,9 @@ export default function UrlInput() {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4">
-      {/* Search Input Box */}
+      {/* Festive Search Input Box with Subtle Glowing Border */}
       <form onSubmit={handleSubmit} className="relative mt-8">
-        <div className="flex flex-col sm:flex-row items-stretch gap-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-2 backdrop-blur-xl shadow-2xl focus-within:border-fuchsia-500/50 transition-all duration-300">
+        <div className="flex flex-col sm:flex-row items-stretch gap-3 rounded-2xl border border-purple-500/35 bg-slate-900/70 p-2 backdrop-blur-xl shadow-2xl shadow-purple-950/30 focus-within:border-amber-400/80 focus-within:shadow-[0_0_30px_rgba(245,158,11,0.22)] transition-all duration-300">
           <div className="relative flex-grow flex items-center pl-3">
             <Link2 className="h-5 w-5 text-slate-500 mr-2" />
             <input
@@ -65,10 +65,11 @@ export default function UrlInput() {
               className="w-full bg-transparent py-3 pr-4 text-slate-100 placeholder-slate-500 focus:outline-none text-base disabled:opacity-50"
             />
           </div>
+          {/* Download Button with Vibrant Purple-Pink-Orange Gradient */}
           <button
             type="submit"
             disabled={isLoading}
-            className="relative flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-600 to-indigo-600 px-6 py-4 text-base font-semibold text-white transition-all hover:from-fuchsia-500 hover:to-indigo-500 active:scale-95 disabled:scale-100 disabled:opacity-50 cursor-pointer shadow-lg shadow-fuchsia-600/20"
+            className="relative flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 px-7 py-4 text-base font-bold text-white transition-all duration-300 hover:from-purple-500 hover:via-pink-500 hover:to-amber-400 hover:shadow-xl hover:shadow-pink-500/30 active:scale-95 disabled:scale-100 disabled:opacity-50 cursor-pointer shadow-lg shadow-purple-600/30"
           >
             {isLoading ? (
               <>
@@ -128,7 +129,7 @@ export default function UrlInput() {
                 {apiResponse.downloadUrl ? (
                   <a
                     href={`${API_URL}/api/media/download?url=${encodeURIComponent(apiResponse.downloadUrl)}&type=${apiResponse.type}`}
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all duration-200 text-center block text-base active:scale-[0.97] shadow-lg shadow-blue-600/25"
+                    className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:from-purple-500 hover:via-pink-500 hover:to-amber-400 text-white font-bold py-4 rounded-xl transition-all duration-200 text-center block text-base active:scale-[0.97] shadow-lg shadow-pink-600/25"
                   >
                     Download
                   </a>

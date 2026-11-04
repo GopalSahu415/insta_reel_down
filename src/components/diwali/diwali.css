@@ -1,0 +1,158 @@
+/* Upgraded Vibrant Festive Diwali Styles */
+
+@keyframes lanternSwayLeft {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+  100% {
+    transform: rotate(-3.5deg);
+  }
+}
+
+@keyframes lanternSwayRight {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+  100% {
+    transform: rotate(3.5deg);
+  }
+}
+
+@keyframes diyaFlicker {
+  0%, 100% {
+    transform: scale(1) translateY(0) skewX(0deg);
+    opacity: 0.95;
+    filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.95)) drop-shadow(0 0 22px rgba(255, 90, 0, 0.7));
+  }
+  25% {
+    transform: scale(1.1, 0.93) translateY(-1.5px) skewX(2.5deg);
+    opacity: 1;
+    filter: drop-shadow(0 0 15px rgba(255, 215, 50, 1)) drop-shadow(0 0 28px rgba(255, 120, 0, 0.85));
+  }
+  50% {
+    transform: scale(0.94, 1.06) translateY(-2.5px) skewX(-2deg);
+    opacity: 0.9;
+    filter: drop-shadow(0 0 9px rgba(255, 160, 0, 0.85)) drop-shadow(0 0 18px rgba(255, 80, 0, 0.6));
+  }
+  75% {
+    transform: scale(1.05, 0.97) translateY(-1px) skewX(1.5deg);
+    opacity: 0.98;
+    filter: drop-shadow(0 0 13px rgba(255, 200, 30, 0.98)) drop-shadow(0 0 24px rgba(255, 100, 0, 0.75));
+  }
+}
+
+/* Soft moving festive background gradient (Deep royal purple, magenta, warm amber, dark indigo) */
+@keyframes ambientFestiveShift {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.75;
+  }
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.95;
+  }
+  100% {
+    background-position: 0% 50%;
+    opacity: 0.75;
+  }
+}
+
+@keyframes fairyLightBlink {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(0.9);
+    filter: drop-shadow(0 0 3px currentColor);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 9px currentColor) drop-shadow(0 0 18px currentColor);
+  }
+}
+
+@keyframes goldenShimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes festivePillGlow {
+  0%, 100% {
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.35), 0 0 35px rgba(217, 70, 239, 0.2), inset 0 0 12px rgba(245, 158, 11, 0.1);
+    border-color: rgba(251, 191, 36, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.55), 0 0 55px rgba(217, 70, 239, 0.35), inset 0 0 18px rgba(245, 158, 11, 0.2);
+    border-color: rgba(253, 224, 71, 0.85);
+  }
+}
+
+@keyframes diyaReflectionGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.15);
+  }
+}
+
+.diwali-lantern-left {
+  animation: lanternSwayLeft 5.5s ease-in-out infinite alternate;
+  transform-origin: top center;
+}
+
+.diwali-lantern-right {
+  animation: lanternSwayRight 6s ease-in-out infinite alternate;
+  transform-origin: top center;
+}
+
+.diwali-diya-flame {
+  animation: diyaFlicker 1.8s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.diwali-ambient-glow {
+  background-size: 200% 200%;
+  animation: ambientFestiveShift 14s ease-in-out infinite;
+}
+
+.diwali-pill-glow {
+  animation: festivePillGlow 3.5s ease-in-out infinite;
+}
+
+.diwali-text-shimmer {
+  background: linear-gradient(90deg, #FDE68A 0%, #FFFFFF 25%, #F59E0B 50%, #FFFFFF 75%, #FDE68A 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: goldenShimmer 4s linear infinite;
+}
+
+.diwali-diya-reflection {
+  animation: diyaReflectionGlow 2s ease-in-out infinite alternate;
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .diwali-lantern-left,
+  .diwali-lantern-right,
+  .diwali-diya-flame,
+  .diwali-ambient-glow,
+  .diwali-pill-glow,
+  .diwali-text-shimmer,
+  .diwali-diya-reflection {
+    animation: none !important;
+  }
+}
